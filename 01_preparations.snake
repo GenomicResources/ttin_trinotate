@@ -1,0 +1,217 @@
+shell.prefix("set -euo pipefail;")
+
+rule all:
+    """
+    Right now the tarballs of trinity and trinotate
+    """
+    input:
+        "src/trinityrnaseq-2.0.6/Trinity",
+        "src/Trinotate-2.0.2/Trinotate",
+        "data/db/uniprot_sprot.trinotate.pep",
+        "data/db/uniprot_uniref90.trinotate.pep",
+        "data/db/Pfam-A.hmm",
+        "data/db/Trinotate.sqlite.gz"
+
+
+
+rule clean:
+    shell:
+        """
+        rm -rf src/trinityrnaseq-2.0.6
+        rm -rf src/Trinotate-2.0.2
+        rm -rf data/db
+        """
+
+
+
+rule download_trinity:
+    output:
+        tarball = "src/trinityrnaseq-2.0.6.tar.gz"
+    params:
+        url = "https://github.com/trinityrnaseq/trinityrnaseq/archive/v2.0.6.tar.gz"
+    threads:
+        1
+    log:
+        "src/trinityrnaseq-2.0.6.log"
+    shell:
+        """
+        wget                        \
+            -O  {output.tarball}    \
+            {params.url}            \
+        > {log} 2>&1
+        """
+
+
+
+rule install_trinity:
+    input:
+        tarball = "src/trinityrnaseq-2.0.6.tar.gz",
+    output:
+        script = "src/trinityrnaseq-2.0.6/Trinity",
+    params:
+        folder = "src/trinityrnaseq-2.0.6"
+    threads:
+        24
+    shell:
+        """
+        tar xvf {input.tarball} -C src
+        make -C {params.folder} -j {threads}
+        touch {output.script}
+        """
+
+
+
+rule download_trinotate:
+    output:
+        tarball = "src/Trinotate-2.0.2.tar.gz"
+    params:
+        url = "https://github.com/Trinotate/Trinotate/archive/v2.0.2.tar.gz"
+    threads:
+        1
+    log:
+        "src/Trinotate-v2.0.2.log"
+    shell:
+        """
+        wget                        \
+            -O {output.tarball}     \
+            {params.url}            \
+        > {log} 2>&1
+        """
+
+
+
+rule install_trinotate:
+    input:
+        tarball = "src/Trinotate-2.0.2.tar.gz"
+    output:
+        script = "src/Trinotate-2.0.2/Trinotate"
+    threads:
+        1
+    shell:
+        """
+        tar xvf {input.tarball} -C src
+        touch {output.script}
+        """
+
+
+
+rule download_uniprot_sprot:
+    output:
+        "data/db/uniprot_sprot.trinotate.pep.gz"
+    params:
+        url= "ftp://ftp.broadinstitute.org/pub/Trinity/Trinotate_v2.0_RESOURCES/uniprot_sprot.trinotate_v2.0.pep.gz",
+        folder= "data/db"
+    threads:
+        1
+    shell:
+        """
+        mkdir -p {params.folder}
+        wget {params.url} -O {output}
+        """
+
+
+
+rule makeblastdb_uniprot_sprot:
+    input:
+        "data/db/uniprot_sprot.trinotate.pep.gz"
+    output:
+        "data/db/uniprot_sprot.trinotate.pep"
+    threads:
+        1
+    shell:
+        """
+        gzip -dc {input}            |
+        makeblastdb                 \
+            -dbtype prot            \
+            -title  {output}        \
+            -out    {output}        \
+        
+        echo "This is a mock file for Snakemake" > {output}
+        """
+
+
+
+rule download_uniprot_uniref90:
+    output:
+        "data/db/uniprot_uniref90.trinotate.pep.gz"
+    params:
+        url= "ftp://ftp.broadinstitute.org/pub/Trinity/Trinotate_v2.0_RESOURCES/uniprot_uniref90.trinotate_v2.0.pep.gz",
+        folder= "data/db"
+    threads:
+        1
+    shell:
+        """
+        mkdir -p {params.folder}
+        wget {params.url} -O {output}
+        """
+
+
+
+rule makeblatstdb_uniprot_uniref90:
+    input:
+        "data/db/uniprot_uniref90.trinotate.pep.gz"
+    output:
+        "data/db/uniprot_uniref90.trinotate.pep"
+    threads:
+        1
+    shell:
+        """
+        gzip -dc {input}            |
+        makeblastdb                 \
+            -dbtype prot            \
+            -title  {output}        \
+            -out    {output}        \
+        
+        echo "This is a mock file for Snakemake" > {output}
+        """
+
+
+
+rule download_pfam_a:
+    output:
+        "data/db/Pfam-A.hmm.gz"
+    params:
+        url= "ftp://ftp.broadinstitute.org/pub/Trinity/Trinotate_v2.0_RESOURCES/Pfam-A.hmm.gz",
+        folder= "data/db"
+    threads:
+        1
+    shell:
+        """
+        mkdir -p {params.folder}
+        wget {params.url} -O {output}
+        """
+
+
+
+rule hmmpress_pfam_a:
+    input:
+        "data/db/Pfam-A.hmm.gz"
+    output:
+        "data/db/Pfam-A.hmm"
+    threads:
+        1
+    shell:
+        """
+        gunzip -k {input}
+        hmmpress {output}
+        printf "This is a mock file for Snakemake" > {output}
+        """
+
+
+
+rule download_and_unzip_sqlite_database:
+    output:
+        "data/db/Trinotate.sqlite.gz"
+    params:
+        url= "ftp://ftp.broadinstitute.org/pub/Trinity/Trinotate_v2.0_RESOURCES/Trinotate.sprot_uniref90.20150131.boilerplate.sqlite.gz",
+        folder= "data/db"
+    threads:
+        1
+    shell:
+        """
+        wget {params.url} -O {output}
+        """
+
+
+
+

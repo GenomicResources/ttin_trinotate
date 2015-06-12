@@ -10,7 +10,6 @@ signalp     = "/usr/local/src/signalp-4.1/signalp"
 tmhmm       = "/usr/local/src/tmhmm-2.0c/bin/tmhmm"
 rnammer_transcriptome= "./src/Trinotate-2.0.2/util/rnammer_support/RnammerTranscriptome.pl"
 rnammer     = "/usr/local/src/rnammer-1.2/rnammer"
-gene_to_trans_map = "./src/trinityrnaseq-2.0.6/util/support_scripts/get_Trinity_gene_to_trans_map.pl"
 trinotate   = "./src/Trinotate-2.0.2/Trinotate"
 ###
 
@@ -425,39 +424,12 @@ rule trinotate_unzip_db:
 
 
 
-rule trinotate_generate_gene_to_trans_map:
-    """
-    NOTE: This only works for Illumina assemblies!! Not 454, PacBio or ESTs
-    It works based on the header of the fasta file
-    """
-    input:
-        assembly= "data/assembly/{sample}.fasta"
-    output:
-        mapfile= "data/trinotate/{sample}_gene_to_trans_map.tsv"
-    threads:
-        1
-    params:
-        folder= "data/trinotate"
-    log:
-        "data/trinotate/{sample}_gene_to_trans_map.log"
-    shell:
-        """
-        mkdir -p {params.folder}
-        
-        {gene_to_trans_map}     \
-            {input.assembly}    \
-        > {output.mapfile}      \
-        2> {log}
-        """
-
-
-
 rule trinotate_init_database:
     input:
         db=         "data/trinotate/{sample}.sqlite",
         assembly=   "data/assembly/{sample}.fasta",
         pep=        "data/transdecoder/{sample}.pep",
-        mapfile=    "data/trinotate/{sample}_gene_to_trans_map.tsv"
+        mapfile=    "data/assembly/{sample}_gene_to_trans_map.tsv"
     output:
         mock=       "data/trinotate/{sample}_db_init.txt"
     params:

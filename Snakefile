@@ -24,6 +24,7 @@ trinotate   = "./src/Trinotate-2.0.2/Trinotate"
 ###
 
 
+
 rule all:
     input:
 #        "data/transdecoder/test.pep",
@@ -44,7 +45,6 @@ rule clean:
         rm -rf data/trinotate
         rm -rf data/transdecoder
         """
-
 
 
 
@@ -196,6 +196,8 @@ rule transdecoder_predict:
         rm -rf {sample}.fasta.transdecoder_dir
         """
 
+
+
 ################################################################################
 # Trinotate                                                                    #
 ################################################################################
@@ -222,7 +224,8 @@ rule trinotate_pep_sprot:
             -num_threads        {threads}   \
             -max_target_seqs    1           \
             -outfmt             6           |
-        gzip -9 > {output.table}
+        gzip -9 > {output.table}            \
+        2> {log}
         """
 
 

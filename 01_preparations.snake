@@ -7,6 +7,7 @@ rule all:
     input:
         "src/trinityrnaseq-2.0.6/Trinity",
         "src/Trinotate-2.0.2/Trinotate",
+        "src/TransDecoder-2.0.1/TransDecoder.LongOrfs",
         "data/db/uniprot_sprot.trinotate.pep",
         "data/db/uniprot_uniref90.trinotate.pep",
         "data/db/Pfam-A.hmm",
@@ -19,6 +20,7 @@ rule clean:
         """
         rm -rf src/trinityrnaseq-2.0.6
         rm -rf src/Trinotate-2.0.2
+        rm -rf src/TransDecoder-2.0.1
         rm -rf data/db
         """
 
@@ -120,11 +122,11 @@ rule makeblastdb_uniprot_sprot:
         1
     shell:
         """
-        gzip -dc {input}            |
-        makeblastdb                 \
-            -dbtype prot            \
-            -title  {output}        \
-            -out    {output}        \
+        gzip -dc {input}        |
+        makeblastdb             \
+            -dbtype prot        \
+            -title  {output}    \
+            -out    {output}    \
         
         echo "This is a mock file for Snakemake" > {output}
         """
@@ -199,7 +201,7 @@ rule hmmpress_pfam_a:
 
 
 
-rule download_and_unzip_sqlite_database:
+rule download_sqlite_database:
     output:
         "data/db/Trinotate.sqlite.gz"
     params:
@@ -214,4 +216,38 @@ rule download_and_unzip_sqlite_database:
 
 
 
+rule download_transdecoder:
+    output:
+        tarball= "src/TransDecoder-2.0.1.tar.gz"
+    params:
+        url= "https://github.com/TransDecoder/TransDecoder/archive/2.0.1.tar.gz",
+    threads:
+        1
+    log:
+        "src/TransDecoder-2.0.1.log"
+    shell:
+        """
+        wget                    \
+            -O {output.tarball} \
+            {params.url}        \
+        > {log} 2>&1
+        """
+
+
+
+rule install_transdecoder:
+    input:
+        tarball= "src/TransDecoder-2.0.1.tar.gz"
+    output:
+        script=  "src/TransDecoder-2.0.1/TransDecoder.LongOrfs"
+    params:
+        folder=  "src/TransDecoder-2.0.1/"
+    threads:
+        1
+    shell:
+        """
+        tar tvf {input.tarball} -C src
+        make -C {params.folder}
+        touch {output.script}
+        """
 

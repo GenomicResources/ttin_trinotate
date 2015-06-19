@@ -55,7 +55,7 @@ rule transdecoder_longorfs:
     input:
         assembly= "data/assembly/{sample}.fasta"
     output:
-        longest_orfs= "{sample}.fasta.transdecoder_dir/longest_orfs.pep"
+        orfs= "{sample}.fasta.transdecoder_dir/longest_orfs.pep"
     params:
         folder= "data/transdecoder"
     threads:
@@ -74,10 +74,10 @@ rule transdecoder_longorfs:
 
 rule transdecoder_pep_sprot:
     input:
-        orfs= "{sample}.fasta.transdecoder_dir/longest_orfs.pep",
-        db=   "data/db/uniprot_sprot.trinotate.pep"
+        orfs=   "{sample}.fasta.transdecoder_dir/longest_orfs.pep",
+        db=     "data/db/uniprot_sprot.trinotate.pep"
     output:
-        table= "data/transdecoder/{sample}_sprot.tsv.gz"
+        table=  "data/transdecoder/{sample}_sprot.tsv.gz"
     threads:
         24
     params:
@@ -93,19 +93,19 @@ rule transdecoder_pep_sprot:
             -max_target_seqs 1      \
             -outfmt 6               \
             -evalue 1e-5            \
-            -num_threads {threads}  |
-        gzip -9 > {output.table}    \
-        2> {log}
+            -num_threads {threads}  \
+        2> {log}                    |
+        gzip -9 > {output.table}
         """
 
 
 
 rule transdecoder_pep_uniref90:
     input:
-        orfs= "{sample}.fasta.transdecoder_dir/longest_orfs.pep",
-        db=   "data/db/uniprot_uniref90.trinotate.pep"
+        orfs=   "{sample}.fasta.transdecoder_dir/longest_orfs.pep",
+        db=     "data/db/uniprot_uniref90.trinotate.pep"
     output:
-        table= "data/transdecoder/{sample}_uniref90.tsv.gz"
+        table=  "data/transdecoder/{sample}_uniref90.tsv.gz"
     params:
         folder= "data/transdecoder"
     threads:
@@ -123,9 +123,9 @@ rule transdecoder_pep_uniref90:
             -max_target_seqs    1               \
             -outfmt             6               \
             -evalue             1e-5            \
-            -num_threads        {threads}       |
-        gzip -9 > {output.table}                \
-        2> {log}
+            -num_threads        {threads}       \
+        2> {log}                                |
+        gzip -9 > {output.table}
         """
 
 
@@ -222,16 +222,16 @@ rule trinotate_pep_sprot:
             -db                 {input.db}  \
             -num_threads        {threads}   \
             -max_target_seqs    1           \
-            -outfmt             6           |
-        gzip -9 > {output.table}            \
-        2> {log}
+            -outfmt             6           \
+        2> {log}                            |
+        gzip -9 > {output.table}
         """
 
 
 
 rule trinotate_rna_sprot:
     input:
-        assembly= "data/assembly/{sample}.fasta",
+        rna= "data/assembly/{sample}.fasta",
         db=  "data/db/uniprot_sprot.trinotate.pep"
     output:
         table= "data/trinotate/{sample}_rna_sprot.tsv.gz"
@@ -245,14 +245,14 @@ rule trinotate_rna_sprot:
         """
         mkdir -p {params.folder}
         
-        blastx                                      \
-            -query              {input.assembly}    \
-            -db                 {input.db}          \
-            -num_threads        {threads}           \
-            -max_target_seqs    1                   \
-            -outfmt             6                   |
-        gzip -9 > {output.table}                    \
-        2> {log}
+        blastx                              \
+            -query              {input.rna} \
+            -db                 {input.db}  \
+            -num_threads        {threads}   \
+            -max_target_seqs    1           \
+            -outfmt             6           \
+        2> {log}                            |
+        gzip -9 > {output.table}
         """
 
 
@@ -287,7 +287,7 @@ rule trinotate_pep_uniref90:
 
 rule trinotate_rna_uniref90:
     input:
-        assembly= "data/assembly/{sample}.fasta",
+        rna= "data/assembly/{sample}.fasta",
         db=  "data/db/uniprot_uniref90.trinotate.pep"
     output:
         table= "data/trinotate/{sample}_rna_uniref90.tsv.gz"
@@ -301,14 +301,14 @@ rule trinotate_rna_uniref90:
         """
         mkdir -p {params.folder}
         
-        blastx                                      \
-            -query              {input.assembly}    \
-            -db                 {input.db}          \
-            -num_threads        {threads}           \
-            -max_target_seqs    1                   \
-            -outfmt             6                   |
-        gzip -9 > {output.table}                    \
-        2> {log}
+        blastx                              \
+            -query              {input.rna} \
+            -db                 {input.db}  \
+            -num_threads        {threads}   \
+            -max_target_seqs    1           \
+            -outfmt             6           \
+        2> {log}                            |
+        gzip -9 > {output.table}
         """
 
 
@@ -367,10 +367,11 @@ rule trinotate_pep_tmhmm:
         1
     shell:
         """
-        {tmhmm}          \
-            --short     \
-        < {input.pep}   \
-        > {output.table}
+        {tmhmm}             \
+            --short         \
+        < {input.pep}       \
+        > {output.table}    \
+        2> {log}
         """
 
 
@@ -406,11 +407,11 @@ rule trinotate_unzip_db:
     input:
         db_gz=  "data/db/Trinotate.sqlite.gz"
     output:
-        db= "data/trinotate/{sample}.sqlite"
+        db=     "data/trinotate/{sample}.sqlite"
     params:
         folder= "data/trinotate"
     log:
-        "data/trinotate/{sample}.sqlite.log"
+                "data/trinotate/{sample}.sqlite.log"
     threads:
         1
     shell:
@@ -435,7 +436,7 @@ rule trinotate_init_database:
     params:
         folder=     "data/trinotate"
     log:
-        "data/trinotate/{sample}_db_init.txt"
+                    "data/trinotate/{sample}_db_init.txt"
     threads:
         24 # Avoid other threads
     shell:

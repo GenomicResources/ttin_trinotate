@@ -1,6 +1,6 @@
 shell.prefix("set -euo pipefail;")
 
-sample= "test"
+sample= "ssco"
 
 ### Executables
 longorfs    = "./src/TransDecoder-2.0.1/TransDecoder.LongOrfs"
@@ -26,15 +26,15 @@ trinotate   = "./src/Trinotate-2.0.2/Trinotate"
 
 rule all:
     input:
-#        "data/transdecoder/test.pep",
-#        "data/trinotate/test_pep_uniref90.tsv.gz",
-#        "data/trinotate/test_rna_uniref90.tsv.gz",
-#        "data/trinotate/test_pep_sprot.tsv.gz",
-#        "data/trinotate/test_rna_sprot.tsv.gz",
-#        "data/trinotate/test_pep_pfam.tsv.gz"
-#        "data/trinotate/test_pep_loaded.txt",
-#        "data/trinotate/test_rna_loaded.txt",
-        "data/trinotate/test.tsv"
+#        "data/transdecoder/{sample}.pep",
+#        "data/trinotate/{sample}_pep_uniref90.tsv.gz",
+#        "data/trinotate/{sample}_rna_uniref90.tsv.gz",
+#        "data/trinotate/{sample}_pep_sprot.tsv.gz",
+#        "data/trinotate/{sample}_rna_sprot.tsv.gz",
+#        "data/trinotate/{sample}_pep_pfam.tsv.gz"
+#        "data/trinotate/{sample}_pep_loaded.txt",
+#        "data/trinotate/{sample}_rna_loaded.txt",
+        "data/trinotate/ssco.tsv"
 
 
 
@@ -436,7 +436,7 @@ rule trinotate_init_database:
     params:
         folder=     "data/trinotate"
     log:
-                    "data/trinotate/{sample}_db_init.txt"
+                    "data/trinotate/{sample}_db_init.log"
     threads:
         24 # Avoid other threads
     shell:
@@ -524,7 +524,7 @@ rule trinotate_load_transcript_results:
         """
         {trinotate}                                             \
             {input.db}                                          \
-            LOAD_swissprot_blastp   <(gzip -dc {input.sprot})   \
+            LOAD_swissprot_blastx   <(gzip -dc {input.sprot})   \
         > {log} 2>&1
         
         {trinotate}                                             \

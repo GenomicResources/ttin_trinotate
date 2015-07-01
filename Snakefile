@@ -519,7 +519,7 @@ rule trinotate_load_transcript_results:
     threads:
         24 # Avoid other threads
     log:
-        "data/trinotate/{sample}_rna_loaded.txt"
+        "data/trinotate/{sample}_rna_loaded.log"
     shell:
         """
         {trinotate}                                             \

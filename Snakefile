@@ -372,6 +372,8 @@ rule trinotate_pep_tmhmm:
         < {input.pep}       \
         > {output.table}    \
         2> {log}
+        
+        rm -rf TMHMM_*
         """
 
 

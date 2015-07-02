@@ -1,15 +1,15 @@
 shell.prefix("set -euo pipefail;")
 
-sample= "ssco"
+sample= "test"
 
 ### Executables
 longorfs    = "./src/TransDecoder-2.0.1/TransDecoder.LongOrfs"
 predict     = "./src/TransDecoder-2.0.1/TransDecoder.Predict"
 hmmscan     = "hmmscan"
-signalp     = "/usr/local/src/signalp-4.1/signalp"
-tmhmm       = "/usr/local/src/tmhmm-2.0c/bin/tmhmm"
-rnammer_transcriptome= "./src/Trinotate-2.0.2/util/rnammer_support/RnammerTranscriptome.pl"
-rnammer     = "/usr/local/src/rnammer-1.2/rnammer"
+signalp     = "./src/signalp-4.1/signalp"
+tmhmm       = "./src/tmhmm-2.0c/bin/tmhmm"
+rnammer_transcriptome = "./src/Trinotate-2.0.2/util/rnammer_support/RnammerTranscriptome.pl"
+rnammer     = "./src/rnammer-1.2/rnammer"
 trinotate   = "./src/Trinotate-2.0.2/Trinotate"
 ###
 
@@ -26,15 +26,15 @@ trinotate   = "./src/Trinotate-2.0.2/Trinotate"
 
 rule all:
     input:
-#        "data/transdecoder/{sample}.pep",
-#        "data/trinotate/{sample}_pep_uniref90.tsv.gz",
-#        "data/trinotate/{sample}_rna_uniref90.tsv.gz",
-#        "data/trinotate/{sample}_pep_sprot.tsv.gz",
-#        "data/trinotate/{sample}_rna_sprot.tsv.gz",
-#        "data/trinotate/{sample}_pep_pfam.tsv.gz"
-#        "data/trinotate/{sample}_pep_loaded.txt",
-#        "data/trinotate/{sample}_rna_loaded.txt",
-        "data/trinotate/ssco.tsv"
+#        expand( "data/transdecoder/{sample}.pep", sample= SAMPLES),
+#        expand( "data/trinotate/{sample}_pep_uniref90.tsv.gz", sample= SAMPLES),
+#        expand( "data/trinotate/{sample}_rna_uniref90.tsv.gz",sample= SAMPLES),
+#        expand( "data/trinotate/{sample}_pep_sprot.tsv.gz",sample= SAMPLES),
+#        expand( "data/trinotate/{sample}_rna_sprot.tsv.gz",sample= SAMPLES),
+#        expand( "data/trinotate/{sample}_pep_pfam.tsv.gz"sample= SAMPLES),
+#        expand( "data/trinotate/{sample}_pep_loaded.txt",sample= SAMPLES),
+#        expand( "data/trinotate/{sample}_rna_loaded.txt",sample= SAMPLES),
+        "data/trinotate/test.tsv"
 
 
 
@@ -566,3 +566,4 @@ rule trinotate_generate_report:
         > {output.report}                           \
         2> {log}
         """
+

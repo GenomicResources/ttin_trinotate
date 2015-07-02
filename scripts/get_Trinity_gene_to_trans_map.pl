@@ -1,0 +1,1 @@
+../src/trinityrnaseq-2.0.6/util/support_scripts/get_Trinity_gene_to_trans_map.pl

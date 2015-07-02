@@ -10,7 +10,7 @@
 
 # full path to the signalp-4.1 directory on your system (mandatory)
 BEGIN {
-    $ENV{SIGNALP} = '/usr/cbs/bio/src/signalp-4.1';
+    $ENV{SIGNALP} = './src/signalp-4.1';
 }
 
 # determine where to store temporary files (must be writable to all users)

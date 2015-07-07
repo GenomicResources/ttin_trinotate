@@ -152,11 +152,11 @@ rule transdecoder_pep_pfam:
         """
         mkdir -p {params.folder}
         
-        {hmmscan}                                   \
-            --cpu       {threads}                   \
-            --domtblout >({gzip} -9 > {output.table}) \
-            {input.db}                              \
-            {input.orfs}                            \
+        {hmmscan}                                       \
+            --cpu       {threads}                       \
+            --domtblout >({gzip} -9 > {output.table})   \
+            {input.db}                                  \
+            {input.orfs}                                \
         > {log} 2>&1
         """
 
@@ -188,7 +188,7 @@ rule transdecoder_predict:
         """
         {predict}                                           		    \
             -t                      {input.assembly}        		    \
-            --retain_pfam_hits      <({gzip} -dc {input.pfam_table}) 	 	\
+            --retain_pfam_hits      <({gzip} -dc {input.pfam_table})    \
             --retain_blastp_hits    <({gzip} -dc {input.uniref_table})	\
         > {log} 2>&1
         
@@ -285,7 +285,7 @@ rule trinotate_pep_uniref90:
             -num_threads        {threads}   \
             -max_target_seqs    1           \
             -outfmt             6           |
-        {gzip} -9 > {output.table}            \
+        {gzip} -9 > {output.table}          \
         2> {log}
         """
 
@@ -332,11 +332,11 @@ rule trinotate_pep_pfam:
         24
     shell:
         """
-        {hmmscan}                                   \
-            --cpu       {threads}                   \
-            --domtblout >({gzip} -9 > {output.table}) \
-            {input.db}                              \
-            {input.pep}                             \
+        {hmmscan}                                       \
+            --cpu       {threads}                       \
+            --domtblout >({gzip} -9 > {output.table})   \
+            {input.db}                                  \
+            {input.pep}                                 \
         > {log}
         """
 
@@ -426,8 +426,8 @@ rule trinotate_unzip_db:
         """
         mkdir -p {params.folder}
         
-        {gzip} -dc {input.db_gz}  \
-        > {output.db}           \
+        {gzip} -dc {input.db_gz}    \
+        > {output.db}               \
         2> {log}
         """
 
@@ -537,19 +537,19 @@ rule trinotate_load_transcript_results:
         "data/trinotate/{sample}_rna_loaded.log"
     shell:
         """
-        {trinotate}                                             \
-            {input.db}                                          \
-            LOAD_swissprot_blastx   <({gzip} -dc {input.sprot})   \
+        {trinotate}                                                 \
+            {input.db}                                              \
+            LOAD_swissprot_blastx   <({gzip} -dc {input.sprot})     \
         > {log} 2>&1
         
-        {trinotate}                                             \
-            {input.db}                                          \
-            LOAD_trembl_blastx      <({gzip} -dc {input.trembl})  \
+        {trinotate}                                                 \
+            {input.db}                                              \
+            LOAD_trembl_blastx      <({gzip} -dc {input.trembl})    \
         >> {log} 2>&1
         
-        {trinotate}                                             \
-            {input.db}                                          \
-            LOAD_rnammer            {input.rnammer}             \
+        {trinotate}                                                 \
+            {input.db}                                              \
+            LOAD_rnammer            {input.rnammer}                 \
         >> {log} 2>&1
         
         printf "This is a mock file" > {output.mock}

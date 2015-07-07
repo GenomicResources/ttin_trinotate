@@ -464,6 +464,7 @@ rule trinotate_init_database:
         """
 
 
+
 rule trinotate_load_pep_sprot:
     input:
         mock=   "data/trinotate/{sample}_db_init.txt",

@@ -72,31 +72,34 @@ rule transdecoder_longorfs:
 
 
 
-rule transdecoder_pep_sprot:
-    input:
-        orfs=   "{sample}.fasta.transdecoder_dir/longest_orfs.pep",
-        db=     "data/db/uniprot_sprot.trinotate.pep"
-    output:
-        table=  "data/transdecoder/{sample}_sprot.tsv.gz"
-    threads:
-        24
-    params:
-    log:
-        "data/transdecoder/{sample}_sprot.log"
-    shell:
-        """
-        mkdir -p data/transdecoder
-        
-        blastp                      \
-            -query {input.orfs}     \
-            -db    {input.db}       \
-            -max_target_seqs 1      \
-            -outfmt 6               \
-            -evalue 1e-5            \
-            -num_threads {threads}  \
-        2> {log}                    |
-        gzip -9 > {output.table}
-        """
+#rule transdecoder_pep_sprot:
+#	"""
+#	Written just in case you do not want to use the Blastp against Uniref
+#	"""
+#    input:
+#        orfs=   "{sample}.fasta.transdecoder_dir/longest_orfs.pep",
+#        db=     "data/db/uniprot_sprot.trinotate.pep"
+#    output:
+#        table=  "data/transdecoder/{sample}_sprot.tsv.gz"
+#    threads:
+#        24
+#    params:
+#    log:
+#        "data/transdecoder/{sample}_sprot.log"
+#    shell:
+#        """
+#        mkdir -p data/transdecoder
+#         
+#        blastp                      \
+#            -query {input.orfs}     \
+#            -db    {input.db}       \
+#            -max_target_seqs 1      \
+#            -outfmt 6               \
+#            -evalue 1e-5            \
+#            -num_threads {threads}  \
+#        2> {log}                    |
+#        gzip -9 > {output.table}
+#        """
 
 
 
@@ -135,7 +138,7 @@ rule transdecoder_pep_pfam:
         orfs=   "{sample}.fasta.transdecoder_dir/longest_orfs.pep",
         db=     "data/db/Pfam-A.hmm"
     output:
-        table=  "data/transdecoder/{sample}_pep_pfam.tsv.gz"
+        table=  "data/transdecoder/{sample}_pfam.tsv.gz"
     params:
         folder= "data/transdecoder"
     log:
@@ -160,7 +163,7 @@ rule transdecoder_predict:
     input:
         assembly=       "data/assembly/{sample}.fasta",
         uniref_table=   "data/transdecoder/{sample}_uniref90.tsv.gz",
-        pfam_table=     "data/transdecoder/{sample}_pep_pfam.tsv.gz"
+        pfam_table=     "data/transdecoder/{sample}_pfam.tsv.gz"
     output:
         bed=    "data/transdecoder/{sample}.bed",
         cds=    "data/transdecoder/{sample}.cds",
@@ -455,7 +458,14 @@ rule trinotate_init_database:
         """
 
 
-
+rule trinotate_load_pep_sprot:
+    input:
+        mock=   "data/trinotate/{sample}_db_init.txt",
+        db=     "data/trinotate/{sample}.sqlite",
+        sprot=  "data/trinotate/{sample}_pep_sprot.tsv.gz"
+    output:
+        mock=   "data/trinotate/{sample}_pep_sprot_lade"
+            
 rule trinotate_load_pep_results:
     input:
         mock=       "data/trinotate/{sample}_db_init.txt",

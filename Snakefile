@@ -1,6 +1,7 @@
 shell.prefix("set -euo pipefail;")
 
 sample= "test"
+#SAMPLES= "test".split()
 
 ### Executables
 longorfs    = "./src/TransDecoder-2.0.1/TransDecoder.LongOrfs"
@@ -29,14 +30,18 @@ gzip        = "pigz"
 
 rule all:
     input:
-#        expand( "data/transdecoder/{sample}.pep", sample= SAMPLES),
-#        expand( "data/trinotate/{sample}_pep_uniref90.tsv.gz", sample= SAMPLES),
-#        expand( "data/trinotate/{sample}_rna_uniref90.tsv.gz",sample= SAMPLES),
-#        expand( "data/trinotate/{sample}_pep_sprot.tsv.gz",sample= SAMPLES),
-#        expand( "data/trinotate/{sample}_rna_sprot.tsv.gz",sample= SAMPLES),
-#        expand( "data/trinotate/{sample}_pep_pfam.tsv.gz"sample= SAMPLES),
-#        expand( "data/trinotate/{sample}_pep_loaded.txt",sample= SAMPLES),
-#        expand( "data/trinotate/{sample}_rna_loaded.txt",sample= SAMPLES),
+        #expand( "data/transdecoder/{sample}.pep",
+        #    sample= SAMPLES),
+        #expand( "data/trinotate/{sample}_pep_uniref90.tsv.gz",
+        #    sample= SAMPLES),
+        #expand( "data/trinotate/{sample}_rna_uniref90.tsv.gz",
+        #    sample= SAMPLES),
+        #expand( "data/trinotate/{sample}_pep_sprot.tsv.gz",
+        #    sample= SAMPLES),
+        #expand( "data/trinotate/{sample}_rna_sprot.tsv.gz",
+        #    sample= SAMPLES),
+        #expand( "data/trinotate/{sample}_pep_pfam.tsv.gz",
+        #    sample= SAMPLES),
         "data/trinotate/test.tsv"
 
 
@@ -386,15 +391,15 @@ rule trinotate_pep_tmhmm:
 
 rule trinotate_rna_rnammer:
     input:
-        fasta= "data/assembly/{sample}.fasta"
+        fasta=  "data/assembly/{sample}.fasta"
     output:
-        gff= "data/trinotate/{sample}_rna_rnammer.gff"
+        gff=    "data/trinotate/{sample}_rna_rnammer.gff"
     threads:
         24 # Because it uses nonspecific temporary filenames
     params:
-        tmp=   "tmp.superscaff.rnammer.gff",
-        fasta= "transcriptSuperScaffold.fasta",
-        bed=   "transcriptSuperScaffold.bed"
+        tmp=    "tmp.superscaff.rnammer.gff",
+        fasta=  "transcriptSuperScaffold.fasta",
+        bed=    "transcriptSuperScaffold.bed"
     log:
         "data/trinotate/{sample}_rna_rnammer.log"
     shell:
@@ -444,7 +449,7 @@ rule trinotate_init_database:
     log:
                     "data/trinotate/{sample}_db_init.log"
     threads:
-        24 # Avoid other threads
+        24 # Lock the database
     shell:
         """
         {trinotate}                                 \
@@ -467,7 +472,7 @@ rule trinotate_load_pep_sprot:
     output:
         mock=   "data/trinotate/{sample}_pep_sprot_loaded.txt"
     threads:
-        1
+        24 # Lock the database
     log:
         out=    "data/trinotate/{sample}_pep_sprot_loaded.out",
         err=    "data/trinotate/{sample}_pep_sprot_loaded.err"
@@ -492,7 +497,7 @@ rule trinotate_load_pep_uniref90:
     output:
         mock=   "data/trinotate/{sample}_pep_uniref90_loaded.txt"
     threads:
-        1
+        24 # Lock the database
     log:
         out=    "data/trinotate/{sample}_pep_uniref90_loaded.out",
         err=    "data/trinotate/{sample}_pep_uniref90_loaded.err"
@@ -517,7 +522,7 @@ rule trinotate_load_pep_pfam:
     output:
         mock=   "data/trinotate/{sample}_pep_pfam_loaded.txt"
     threads:
-        1
+        24 # Lock the database
     log:
         out=    "data/trinotate/{sample}_pep_pfam_loaded.out",
         err=    "data/trinotate/{sample}_pep_pfam_loaded.err"
@@ -542,7 +547,7 @@ rule trinotate_load_pep_signalp:
     output:
         mock=       "data/trinotate/{sample}_pep_signalp_loaded.txt"
     threads:
-        1
+        24 # Lock the database
     log:
         out=        "data/trinotate/{sample}_pep_signalp_loaded.out",
         err=        "data/trinotate/{sample}_pep_signalp_loaded.err"
@@ -567,7 +572,7 @@ rule trinotate_load_pep_tmhmm:
     output:
         mock=   "data/trinotate/{sample}_pep_tmhmm_loaded.txt"
     threads:
-        1
+        24 # Lock the database
     log:
         out=    "data/trinotate/{sample}_pep_tmhmm_loaded.out",
         err=    "data/trinotate/{sample}_pep_tmhmm_loaded.err"
@@ -584,38 +589,76 @@ rule trinotate_load_pep_tmhmm:
 
 
 
-rule trinotate_load_transcript_results:
+rule trinotate_load_rna_sprot:
+    input:
+        mock=   "data/trinotate/{sample}_db_init.txt",
+        db=     "data/trinotate/{sample}.sqlite",
+        sprot=  "data/trinotate/{sample}_rna_sprot.tsv.gz",
+    output:
+        mock=   "data/trinotate/{sample}_rna_sprot_loaded.txt"
+    threads:
+        24 # Lock the database
+    log:
+        out=    "data/trinotate/{sample}_rna_sprot_loaded.out",
+        err=    "data/trinotate/{sample}_rna_sprot_loaded.err"
+    shell:
+        """
+        {trinotate}                                             \
+            {input.db}                                          \
+            LOAD_swissprot_blastx   <({gzip} -dc {input.sprot}) \
+        >   {log.out}                                           \
+        2>  {log.err}
+
+        printf "This is a mock file" > {output.mock}
+        """
+
+
+
+rule trinotate_load_rna_uniref90:
+    input:
+        mock=   "data/trinotate/{sample}_db_init.txt",
+        db=     "data/trinotate/{sample}.sqlite",
+        trembl= "data/trinotate/{sample}_rna_uniref90.tsv.gz",
+    output:
+        mock=   "data/trinotate/{sample}_rna_uniref90_loaded.txt"
+    threads:
+        24 # Lock the database
+    log:
+        out=    "data/trinotate/{sample}_rna_uniref90_loaded.out",
+        err=    "data/trinotate/{sample}_rna_uniref90_loaded.err"
+    shell:
+        """
+        {trinotate}                                             \
+            {input.db}                                          \
+            LOAD_trembl_blastx  <({gzip} -dc {input.trembl})    \
+        >   {log.out}                                           \
+        2>  {log.err}
+
+        printf "This is a mock file" > {output.mock}
+        """
+
+
+
+rule trinotate_load_rna_rnammer:
     input:
         mock=       "data/trinotate/{sample}_db_init.txt",
         db=         "data/trinotate/{sample}.sqlite",
-        sprot=      "data/trinotate/{sample}_rna_sprot.tsv.gz",
-        trembl=     "data/trinotate/{sample}_rna_uniref90.tsv.gz",
-        rnammer=    "data/trinotate/{sample}_rna_rnammer.gff"
+        rnammer=    "data/trinotate/{sample}_rna_rnammer.gff",
     output:
-        mock=   "data/trinotate/{sample}_rna_loaded.txt"
-    params:
-        folder= "data/trinotate"
+        mock=       "data/trinotate/{sample}_rna_rnammer_loaded.txt"
     threads:
-        24 # Avoid other threads
+        24 # Lock the database
     log:
-        "data/trinotate/{sample}_rna_loaded.log"
+        out=        "data/trinotate/{sample}_rna_rnammer_loaded.out",
+        err=        "data/trinotate/{sample}_rna_rnammer_loaded.err"
     shell:
         """
-        {trinotate}                                                 \
-            {input.db}                                              \
-            LOAD_swissprot_blastx   <({gzip} -dc {input.sprot})     \
-        > {log} 2>&1
-        
-        {trinotate}                                                 \
-            {input.db}                                              \
-            LOAD_trembl_blastx      <({gzip} -dc {input.trembl})    \
-        >> {log} 2>&1
-        
-        {trinotate}                                                 \
-            {input.db}                                              \
-            LOAD_rnammer            {input.rnammer}                 \
-        >> {log} 2>&1
-        
+        {trinotate}                             \
+            {input.db}                          \
+            LOAD_trembl_blastx  {input.rnammer} \
+        >   {log.out}                           \
+        2>  {log.err}
+
         printf "This is a mock file" > {output.mock}
         """
 
@@ -629,7 +672,9 @@ rule trinotate_generate_report:
         mock_pep_pfam=      "data/trinotate/{sample}_pep_pfam_loaded.txt",
         mock_pep_signalp=   "data/trinotate/{sample}_pep_signalp_loaded.txt",
         mock_pep_tmhmm=     "data/trinotate/{sample}_pep_tmhmm_loaded.txt",
-        mock_rna=   "data/trinotate/{sample}_rna_loaded.txt"
+        mock_rna_sprot=     "data/trinotate/{sample}_rna_sprot_loaded.txt",
+        mock_rna_uniref90=  "data/trinotate/{sample}_rna_uniref90_loaded.txt",
+        mock_rna_rnammer=   "data/trinotate/{sample}_rna_rnammer_loaded.txt",
     output:
         report=     "data/trinotate/{sample}.tsv"
     params:

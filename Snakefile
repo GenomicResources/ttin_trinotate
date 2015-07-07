@@ -467,54 +467,120 @@ rule trinotate_load_pep_sprot:
         db=     "data/trinotate/{sample}.sqlite",
         sprot=  "data/trinotate/{sample}_pep_sprot.tsv.gz"
     output:
-        mock=   "data/trinotate/{sample}_pep_sprot_lade"
-            
-rule trinotate_load_pep_results:
+        mock=   "data/trinotate/{sample}_pep_sprot_loaded.txt"
+    threads:
+        1
+    log:
+        out=    "data/trinotate/{sample}_pep_sprot_loaded.out",
+        err=    "data/trinotate/{sample}_pep_sprot_loaded.err"
+    shell:
+        """
+        {trinotate}                                             \
+            {input.db}                                          \
+            LOAD_swissprot_blastp   <({gzip} -dc {input.sprot}) \
+        >   {log.out}                                           \
+        2>  {log.err}
+
+        printf "This is a mock file" > {output.mock}
+        """
+
+
+
+rule trinotate_load_pep_uniref90:
+    input:
+        mock=   "data/trinotate/{sample}_db_init.txt",
+        db=     "data/trinotate/{sample}.sqlite",
+        trembl= "data/trinotate/{sample}_pep_uniref90.tsv.gz"
+    output:
+        mock=   "data/trinotate/{sample}_pep_uniref90_loaded.txt"
+    threads:
+        1
+    log:
+        out=    "data/trinotate/{sample}_pep_uniref90_loaded.out",
+        err=    "data/trinotate/{sample}_pep_uniref90_loaded.err"
+    shell:
+        """
+        {trinotate}                                             \
+            {input.db}                                          \
+            LOAD_trembl_blastp   <({gzip} -dc {input.trembl})   \
+        >   {log.out}                                           \
+        2>  {log.err}
+
+        printf "This is a mock file" > {output.mock}
+        """
+
+
+
+rule trinotate_load_pep_pfam:
+    input:
+        mock=   "data/trinotate/{sample}_db_init.txt",
+        db=     "data/trinotate/{sample}.sqlite",
+        pfam=   "data/trinotate/{sample}_pep_pfam.tsv.gz"
+    output:
+        mock=   "data/trinotate/{sample}_pep_pfam_loaded.txt"
+    threads:
+        1
+    log:
+        out=    "data/trinotate/{sample}_pep_pfam_loaded.out",
+        err=    "data/trinotate/{sample}_pep_pfam_loaded.err"
+    shell:
+        """
+        {trinotate}                                 \
+            {input.db}                              \
+            LOAD_pfam   <({gzip} -dc {input.pfam})  \
+        >   {log.out}                               \
+        2>  {log.err}
+
+        printf "This is a mock file" > {output.mock}
+        """
+
+
+
+rule trinotate_load_pep_signalp:
     input:
         mock=       "data/trinotate/{sample}_db_init.txt",
         db=         "data/trinotate/{sample}.sqlite",
-        sprot=      "data/trinotate/{sample}_pep_sprot.tsv.gz",
-        trembl=     "data/trinotate/{sample}_pep_uniref90.tsv.gz",
-        pfam=       "data/trinotate/{sample}_pep_pfam.tsv.gz",
-        tmhmm=      "data/trinotate/{sample}_pep_tmhmm.tsv",
         signalp=    "data/trinotate/{sample}_pep_signalp.tsv"
     output:
-        mock=       "data/trinotate/{sample}_pep_loaded.txt"
+        mock=       "data/trinotate/{sample}_pep_signalp_loaded.txt"
     threads:
-        24 # Avoid other accesses
-    params:
-        folder= "data/trinotate"
+        1
     log:
-        "data/trinotate/{sample}_pep_loaded.log"
+        out=        "data/trinotate/{sample}_pep_signalp_loaded.out",
+        err=        "data/trinotate/{sample}_pep_signalp_loaded.err"
     shell:
         """
-        mkdir -p {params.folder}
-        
-        {trinotate}                                                 \
-            {input.db}                                              \
-            LOAD_swissprot_blastp   <({gzip} -dc {input.sprot})     \
-        > {log} 2>&1
-        
-        {trinotate}                                                 \
-            {input.db}                                              \
-            LOAD_trembl_blastp      <({gzip} -dc {input.trembl})    \
-        >> {log} 2>&1
-        
-        {trinotate}                                                 \
-            {input.db}                                              \
-            LOAD_pfam               <({gzip} -dc {input.pfam})      \
-        >> {log} 2>&1
-        
-        {trinotate}                                                 \
-            {input.db}                                              \
-            LOAD_tmhmm              {input.tmhmm}                   \
-        >> {log} 2>&1
-        
-        {trinotate}                                                 \
-            {input.db}                                              \
-            LOAD_signalp            {input.signalp}                 \
-        >> {log} 2>&1
-        
+        {trinotate}                         \
+            {input.db}                      \
+            LOAD_signalp    {input.signalp} \
+        >   {log.out}                       \
+        2>  {log.err}
+
+        printf "This is a mock file" > {output.mock}
+        """
+
+
+
+rule trinotate_load_pep_tmhmm:
+    input:
+        mock=   "data/trinotate/{sample}_db_init.txt",
+        db=     "data/trinotate/{sample}.sqlite",
+        tmhmm=  "data/trinotate/{sample}_pep_tmhmm.tsv"
+    output:
+        mock=   "data/trinotate/{sample}_pep_tmhmm_loaded.txt"
+    threads:
+        1
+    log:
+        out=        "data/trinotate/{sample}_pep_tmhmm_loaded.out",
+        err=        "data/trinotate/{sample}_pep_tmhmm_loaded.err"
+    shell:
+        """
+        {trinotate}                     \
+            {input.db}                  \
+            LOAD_tmhmm    {input.tmhmm} \
+        >   {log.out}                   \
+        2>  {log.err}
+
         printf "This is a mock file" > {output.mock}
         """
 
@@ -559,8 +625,12 @@ rule trinotate_load_transcript_results:
 
 rule trinotate_generate_report:
     input:
-        db=         "data/trinotate/{sample}.sqlite",
-        mock_pep=   "data/trinotate/{sample}_pep_loaded.txt",
+        db=                 "data/trinotate/{sample}.sqlite",
+        mock_pep_sprot=     "data/trinotate/{sample}_pep_sprot_loaded.txt",
+        mock_pep_uniref90=  "data/trinotate/{sample}_pep_uniref90_loaded.txt",
+        mock_pep_pfam=      "data/trinotate/{sample}_pep_pfam_loaded.txt",
+        mock_pep_signalp=   "data/trinotate/{sample}_pep_signalp_loaded.txt",
+        mock_pep_tmhmm=     "data/trinotate/{sample}_pep_tmhmm_loaded.txt",
         mock_rna=   "data/trinotate/{sample}_rna_loaded.txt"
     output:
         report=     "data/trinotate/{sample}.tsv"

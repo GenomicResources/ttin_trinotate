@@ -61,21 +61,23 @@ rule clean:
 
 rule transdecoder_longorfs:
     input:
-        assembly= "data/assembly/{sample}.fasta"
+        assembly=   "data/assembly/{sample}.fasta"
     output:
-        orfs= "{sample}.fasta.transdecoder_dir/longest_orfs.pep"
+        orfs=       "{sample}.fasta.transdecoder_dir/longest_orfs.pep"
     params:
-        folder= "data/transdecoder"
+        folder=     "data/transdecoder"
     threads:
         1
     log:
-        "data/transdecoder/{sample}_longorfs.log"
+        out=        "data/transdecoder/{sample}_longorfs.out",
+        err=        "data/transdecoder/{sample}_longorfs.err"
     shell:
         """
         mkdir -p {params.folder}
         
         {longorfs} -t {input.assembly}  \
-        > {log} 2>&1
+        >   {log.out}                   \
+        2>  {log.err}
         """
 
 
@@ -91,7 +93,6 @@ rule transdecoder_longorfs:
 #        table=  "data/transdecoder/{sample}_sprot.tsv.gz"
 #    threads:
 #        24
-#    params:
 #    log:
 #        "data/transdecoder/{sample}_sprot.log"
 #    shell:
@@ -121,9 +122,9 @@ rule transdecoder_pep_uniref90:
         folder= "data/transdecoder"
     threads:
         24
-    params:
     log:
-        "data/transdecoder/{sample}_uniref90.log"
+        out=    "data/transdecoder/{sample}_uniref90.out",
+        err=    "data/transdecoder/{sample}_uniref90.err"
     shell:
         """
         mkdir -p {params.folder}
@@ -135,8 +136,9 @@ rule transdecoder_pep_uniref90:
             -outfmt             6               \
             -evalue             1e-5            \
             -num_threads        {threads}       \
-        2> {log}                                |
-        {gzip} -9 > {output.table}
+        2>  {log.err}                           |
+        {gzip} -9 > {output.table}              \
+        >   {log.out}
         """
 
 
@@ -150,7 +152,8 @@ rule transdecoder_pep_pfam:
     params:
         folder= "data/transdecoder"
     log:
-        "data/transdecoder/{sample}_pfam.log"
+        out=    "data/transdecoder/{sample}_pfam.out",
+        err=    "data/transdecoder/{sample}_pfam.err"
     threads:
         24
     shell:
@@ -162,7 +165,8 @@ rule transdecoder_pep_pfam:
             --domtblout >({gzip} -9 > {output.table})   \
             {input.db}                                  \
             {input.orfs}                                \
-        > {log} 2>&1
+        >   {log.out}                                   \
+        2>  {log.err}
         """
 
 
@@ -188,14 +192,16 @@ rule transdecoder_predict:
     threads:
         1
     log:
-        "data/transdecoder/{sample}_predict.log"
+        out=    "data/transdecoder/{sample}_predict.out",
+        err=    "data/transdecoder/{sample}_predict.err"
     shell:
         """
         {predict}                                           		    \
             -t                      {input.assembly}        		    \
             --retain_pfam_hits      <({gzip} -dc {input.pfam_table})    \
             --retain_blastp_hits    <({gzip} -dc {input.uniref_table})	\
-        > {log} 2>&1
+        >   {log.out}                                                   \
+        2>  {log.err}
         
         mv  {params.bed}  {output.bed}
         mv  {params.cds}  {output.cds}
@@ -214,14 +220,15 @@ rule transdecoder_predict:
 
 rule trinotate_pep_sprot:
     input:
-        pep= "data/transdecoder/{sample}.pep",
-        db=  "data/db/uniprot_sprot.trinotate.pep"
+        pep=    "data/transdecoder/{sample}.pep",
+        db=     "data/db/uniprot_sprot.trinotate.pep"
     output:
-        table= "data/trinotate/{sample}_pep_sprot.tsv.gz"
+        table=  "data/trinotate/{sample}_pep_sprot.tsv.gz"
     params:
         folder= "data/trinotate"
     log:
-        "data/trinotate/{sample}_pep_sprot.log"
+        out=    "data/trinotate/{sample}_pep_sprot.out",
+        err=    "data/trinotate/{sample}_pep_sprot.err"
     threads:
         24
     shell:
@@ -234,22 +241,24 @@ rule trinotate_pep_sprot:
             -num_threads        {threads}   \
             -max_target_seqs    1           \
             -outfmt             6           \
-        2> {log}                            |
-        {gzip} -9 > {output.table}
+        2>  {log.err}                        |
+        {gzip} -9 > {output.table}          \
+        >   {log.out}
         """
 
 
 
 rule trinotate_rna_sprot:
     input:
-        rna= "data/assembly/{sample}.fasta",
-        db=  "data/db/uniprot_sprot.trinotate.pep"
+        rna=    "data/assembly/{sample}.fasta",
+        db=     "data/db/uniprot_sprot.trinotate.pep"
     output:
-        table= "data/trinotate/{sample}_rna_sprot.tsv.gz"
+        table=  "data/trinotate/{sample}_rna_sprot.tsv.gz"
     params:
         folder= "data/trinotate"
     log:
-        "data/trinotate/{sample}_rna_sprot.log"
+        out=    "data/trinotate/{sample}_rna_sprot.out",
+        err=    "data/trinotate/{sample}_rna_sprot.err"
     threads:
         24
     shell:
@@ -262,22 +271,24 @@ rule trinotate_rna_sprot:
             -num_threads        {threads}   \
             -max_target_seqs    1           \
             -outfmt             6           \
-        2> {log}                            |
-        {gzip} -9 > {output.table}
+        2>  {log.err}                       |
+        {gzip} -9 > {output.table}          \
+        >   {log.out}
         """
 
 
 
 rule trinotate_pep_uniref90:
     input:
-        pep= "data/transdecoder/{sample}.pep",
-        db=  "data/db/uniprot_uniref90.trinotate.pep"
+        pep=    "data/transdecoder/{sample}.pep",
+        db=     "data/db/uniprot_uniref90.trinotate.pep"
     output:
-        table= "data/trinotate/{sample}_pep_uniref90.tsv.gz"
+        table=  "data/trinotate/{sample}_pep_uniref90.tsv.gz"
     params:
         folder= "data/trinotate"
     log:
-        "data/trinotate/{sample}_pep_uniref90.log"
+        out=    "data/trinotate/{sample}_pep_uniref90.out",
+        err=    "data/trinotate/{sample}_pep_uniref90.err"
     threads:
         24
     shell:
@@ -289,23 +300,25 @@ rule trinotate_pep_uniref90:
             -db                 {input.db}  \
             -num_threads        {threads}   \
             -max_target_seqs    1           \
-            -outfmt             6           |
+            -outfmt             6           \
+        2>  {log.err}                       |
         {gzip} -9 > {output.table}          \
-        2> {log}
+        > {log.out}
         """
 
 
 
 rule trinotate_rna_uniref90:
     input:
-        rna= "data/assembly/{sample}.fasta",
-        db=  "data/db/uniprot_uniref90.trinotate.pep"
+        rna=    "data/assembly/{sample}.fasta",
+        db=     "data/db/uniprot_uniref90.trinotate.pep"
     output:
-        table= "data/trinotate/{sample}_rna_uniref90.tsv.gz"
+        table=  "data/trinotate/{sample}_rna_uniref90.tsv.gz"
     params:
         folder= "data/trinotate"
     log:
-        "data/trinotate/{sample}_rna_uniref90.log"
+        out=    "data/trinotate/{sample}_rna_uniref90.out",
+        err=    "data/trinotate/{sample}_rna_uniref90.err"
     threads:
         24
     shell:
@@ -318,21 +331,23 @@ rule trinotate_rna_uniref90:
             -num_threads        {threads}   \
             -max_target_seqs    1           \
             -outfmt             6           \
-        2> {log}                            |
-        {gzip} -9 > {output.table}
+        2>  {log.err}                       |
+        {gzip} -9 > {output.table}          \
+        >   {log.out}
         """
 
 
 
 rule trinotate_pep_pfam:
     input:
-        pep= "data/transdecoder/{sample}.pep",
-        db=  "data/db/Pfam-A.hmm"
+        pep=    "data/transdecoder/{sample}.pep",
+        db=     "data/db/Pfam-A.hmm"
     output:
-        table= "data/trinotate/{sample}_pep_pfam.tsv.gz"
+        table=  "data/trinotate/{sample}_pep_pfam.tsv.gz"
     params:
     log:
-        "data/trinotate/{sample}_pep_pfam.log"
+        out=    "data/trinotate/{sample}_pep_pfam.out",
+        err=    "data/trinotate/{sample}_pep_pfam.err"
     threads:
         24
     shell:
@@ -342,18 +357,20 @@ rule trinotate_pep_pfam:
             --domtblout >({gzip} -9 > {output.table})   \
             {input.db}                                  \
             {input.pep}                                 \
-        > {log}
+        >   {log.out}                                   \
+        2>  {log.err}
         """
 
 
 
 rule trinotate_pep_signalp:
     input:
-        pep= "data/transdecoder/{sample}.pep",
+        pep=    "data/transdecoder/{sample}.pep",
     output:
-        table= "data/trinotate/{sample}_pep_signalp.tsv"
+        table=  "data/trinotate/{sample}_pep_signalp.tsv"
     log:
-        "data/trinotate/{sample}_pep_signalp.log"
+        out=    "data/trinotate/{sample}_pep_signalp.out",
+        err=    "data/trinotate/{sample}_pep_signalp.err"
     threads:
         1
     shell:
@@ -362,18 +379,20 @@ rule trinotate_pep_signalp:
             -f  short           \
             -n  {output.table}  \
             {input.pep}         \
-        > {log} 2>&1
+        >   {log.out}           \
+        2>  {log.err}
         """
 
 
 
 rule trinotate_pep_tmhmm:
     input:
-        pep= "data/transdecoder/{sample}.pep"
+        pep=    "data/transdecoder/{sample}.pep"
     output:
-        table= "data/trinotate/{sample}_pep_tmhmm.tsv"
+        table=  "data/trinotate/{sample}_pep_tmhmm.tsv"
     log:
-        "data/trinotate/{sample}_pep_tmhmm.log"
+        out=    "data/trinotate/{sample}_pep_tmhmm.out",
+        err=    "data/trinotate/{sample}_pep_tmhmm.err"
     threads:
         1
     shell:
@@ -382,7 +401,7 @@ rule trinotate_pep_tmhmm:
             --short         \
         < {input.pep}       \
         > {output.table}    \
-        2> {log}
+        2> {log.err}
         
         rm -rf TMHMM_*
         """
@@ -401,13 +420,15 @@ rule trinotate_rna_rnammer:
         fasta=  "transcriptSuperScaffold.fasta",
         bed=    "transcriptSuperScaffold.bed"
     log:
-        "data/trinotate/{sample}_rna_rnammer.log"
+        out=    "data/trinotate/{sample}_rna_rnammer.out",
+        err=    "data/trinotate/{sample}_rna_rnammer.err"
     shell:
         """
         {rnammer_transcriptome}                 \
             --transcriptome     {input.fasta}   \
             --path_to_rnammer   {rnammer}       \
-        > {log} 2>&1
+        >   {log.out}                           \
+        2>  {log.err}
         
         mv {sample}.fasta.rnammer.gff {output.gff}
         
@@ -424,7 +445,8 @@ rule trinotate_unzip_db:
     params:
         folder= "data/trinotate"
     log:
-                "data/trinotate/{sample}.sqlite.log"
+        out=    "data/trinotate/{sample}_sqlite.out",
+        err=    "data/trinotate/{sample}_sqlite.err"
     threads:
         1
     shell:
@@ -432,8 +454,8 @@ rule trinotate_unzip_db:
         mkdir -p {params.folder}
         
         {gzip} -dc {input.db_gz}    \
-        > {output.db}               \
-        2> {log}
+        >   {output.db}             \
+        2>  {log.err}
         """
 
 
@@ -447,7 +469,8 @@ rule trinotate_init_database:
     output:
         mock=       "data/trinotate/{sample}_db_init.txt"
     log:
-                    "data/trinotate/{sample}_db_init.log"
+        out=        "data/trinotate/{sample}_db_init.out",
+        err=        "data/trinotate/{sample}_db_init.err"
     threads:
         24 # Lock the database
     shell:
@@ -458,7 +481,8 @@ rule trinotate_init_database:
             --gene_trans_map    {input.mapfile}     \
             --transcript_fasta  {input.assembly}    \
             --transdecoder_pep  {input.pep}         \
-        > {log} 2>&1
+        >   {log.out}                               \
+        2>  {log.err}
         
         printf "This is a mock file" > {output.mock}
         """
@@ -677,12 +701,13 @@ rule trinotate_generate_report:
         mock_rna_uniref90=  "data/trinotate/{sample}_rna_uniref90_loaded.txt",
         mock_rna_rnammer=   "data/trinotate/{sample}_rna_rnammer_loaded.txt",
     output:
-        report=     "data/trinotate/{sample}.tsv"
+        report=             "data/trinotate/{sample}.tsv"
     params:
-        evalue=         "1e-5",
-        pfam_cutoff=    "DNC" # DNC DGC DTC SNC SGC STC
+        evalue=             "1e-5",
+        pfam_cutoff=        "DNC" # DNC DGC DTC SNC SGC STC
     log:
-        "data/trinotate/{sample}_report.log"
+        out=                "data/trinotate/{sample}_report.out",
+        err=                "data/trinotate/{sample}_report.err"
     threads:
         24 # Avoid other threads
     shell:
@@ -693,6 +718,6 @@ rule trinotate_generate_report:
             -E              {params.evalue}         \
             --pfam_cutoff   {params.pfam_cutoff}    \
         > {output.report}                           \
-        2> {log}
+        2> {log.err}
         """
 

@@ -4,6 +4,8 @@ sample= "test"
 
 ### Executables
 longorfs    = "./src/TransDecoder-2.0.1/TransDecoder.LongOrfs"
+blastp      = "blastp"
+blastx      = "blastx"
 predict     = "./src/TransDecoder-2.0.1/TransDecoder.Predict"
 hmmscan     = "hmmscan"
 signalp     = "./src/signalp-4.1/signalp"
@@ -90,7 +92,7 @@ rule transdecoder_longorfs:
 #        """
 #        mkdir -p data/transdecoder
 #         
-#        blastp                      \
+#        {blastp}                    \
 #            -query {input.orfs}     \
 #            -db    {input.db}       \
 #            -max_target_seqs 1      \
@@ -120,7 +122,7 @@ rule transdecoder_pep_uniref90:
         """
         mkdir -p {params.folder}
         
-        blastp                                  \
+        {blastp}                                \
             -query              {input.orfs}    \
             -db                 {input.db}      \
             -max_target_seqs    1               \
@@ -220,7 +222,7 @@ rule trinotate_pep_sprot:
         """
         mkdir -p {params.folder}
         
-        blastp                              \
+        {blastp}                            \
             -query              {input.pep} \
             -db                 {input.db}  \
             -num_threads        {threads}   \
@@ -248,7 +250,7 @@ rule trinotate_rna_sprot:
         """
         mkdir -p {params.folder}
         
-        blastx                              \
+        {blastx}                            \
             -query              {input.rna} \
             -db                 {input.db}  \
             -num_threads        {threads}   \
@@ -276,7 +278,7 @@ rule trinotate_pep_uniref90:
         """
         mkdir -p {params.folder}
         
-        blastp                              \
+        {blastp}                            \
             -query              {input.pep} \
             -db                 {input.db}  \
             -num_threads        {threads}   \
@@ -304,7 +306,7 @@ rule trinotate_rna_uniref90:
         """
         mkdir -p {params.folder}
         
-        blastx                              \
+        {blastx}                            \
             -query              {input.rna} \
             -db                 {input.db}  \
             -num_threads        {threads}   \
@@ -396,9 +398,9 @@ rule trinotate_rna_rnammer:
         "data/trinotate/{sample}_rna_rnammer.log"
     shell:
         """
-        {rnammer_transcriptome}             \
-            --transcriptome {input.fasta}   \
-            --path_to_rnammer {rnammer}     \
+        {rnammer_transcriptome}                 \
+            --transcriptome     {input.fasta}   \
+            --path_to_rnammer   {rnammer}       \
         > {log} 2>&1
         
         mv {sample}.fasta.rnammer.gff {output.gff}

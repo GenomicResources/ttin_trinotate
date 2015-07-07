@@ -183,10 +183,10 @@ rule transdecoder_predict:
         "data/transdecoder/{sample}_predict.log"
     shell:
         """
-        {predict}                                           \
-            -t                      {input.assembly}        \
-            --retain_pfam_hits      {input.pfam_table}      \
-            --retain_blastp_hits    {input.uniref_table}    \
+        {predict}                                           		    \
+            -t                      {input.assembly}        		    \
+            --retain_pfam_hits      <(gzip -dc {input.pfam_table}) 	 	\
+            --retain_blastp_hits    <(gzip -dc {input.uniref_table})	\
         > {log} 2>&1
         
         mv  {params.bed}  {output.bed}

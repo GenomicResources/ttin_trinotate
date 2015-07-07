@@ -441,8 +441,6 @@ rule trinotate_init_database:
         mapfile=    "data/assembly/{sample}_gene_to_trans_map.tsv"
     output:
         mock=       "data/trinotate/{sample}_db_init.txt"
-    params:
-        folder=     "data/trinotate"
     log:
                     "data/trinotate/{sample}_db_init.log"
     threads:
@@ -571,8 +569,8 @@ rule trinotate_load_pep_tmhmm:
     threads:
         1
     log:
-        out=        "data/trinotate/{sample}_pep_tmhmm_loaded.out",
-        err=        "data/trinotate/{sample}_pep_tmhmm_loaded.err"
+        out=    "data/trinotate/{sample}_pep_tmhmm_loaded.out",
+        err=    "data/trinotate/{sample}_pep_tmhmm_loaded.err"
     shell:
         """
         {trinotate}                     \

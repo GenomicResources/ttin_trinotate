@@ -137,8 +137,9 @@ rule transdecoder_pep_uniref90:
             -evalue             1e-5            \
             -num_threads        {threads}       \
         2>  {log.err}                           |
-        {gzip} -9 > {output.table}              \
-        >   {log.out}
+        {gzip} -9 > {output.table}
+
+		touch {log.out}
         """
 
 
@@ -241,9 +242,10 @@ rule trinotate_pep_sprot:
             -num_threads        {threads}   \
             -max_target_seqs    1           \
             -outfmt             6           \
-        2>  {log.err}                        |
-        {gzip} -9 > {output.table}          \
-        >   {log.out}
+        2>  {log.err}                       |
+        {gzip} -9 > {output.table}
+
+		touch {log.out}
         """
 
 
@@ -272,8 +274,9 @@ rule trinotate_rna_sprot:
             -max_target_seqs    1           \
             -outfmt             6           \
         2>  {log.err}                       |
-        {gzip} -9 > {output.table}          \
-        >   {log.out}
+        {gzip} -9 > {output.table}
+
+		touch {log.out}
         """
 
 
@@ -302,8 +305,9 @@ rule trinotate_pep_uniref90:
             -max_target_seqs    1           \
             -outfmt             6           \
         2>  {log.err}                       |
-        {gzip} -9 > {output.table}          \
-        > {log.out}
+        {gzip} -9 > {output.table}
+
+		touch {log.out}
         """
 
 
@@ -332,8 +336,9 @@ rule trinotate_rna_uniref90:
             -max_target_seqs    1           \
             -outfmt             6           \
         2>  {log.err}                       |
-        {gzip} -9 > {output.table}          \
-        >   {log.out}
+        {gzip} -9 > {output.table}
+
+		touch   {log.out}
         """
 
 

@@ -683,10 +683,10 @@ rule trinotate_load_rna_rnammer:
         err=        "data/trinotate/{sample}_rna_rnammer_loaded.err"
     shell:
         """
-        {trinotate}                             \
-            {input.db}                          \
-            LOAD_trembl_blastx  {input.rnammer} \
-        >   {log.out}                           \
+        {trinotate}                         \
+            {input.db}                      \
+            LOAD_rnammer {input.rnammer}    \
+        >   {log.out}                       \
         2>  {log.err}
 
         printf "This is a mock file" > {output.mock}

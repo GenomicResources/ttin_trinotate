@@ -77,9 +77,9 @@ rule transdecoder_longorfs:
 
 
 #rule transdecoder_pep_sprot:
-#	"""
-#	Written just in case you do not want to use the Blastp against Uniref
-#	"""
+#   """
+#   Written just in case you do not want to use the Blastp against Uniref
+#   """
 #    input:
 #        orfs=   "{sample}.fasta.transdecoder_dir/longest_orfs.pep",
 #        db=     "data/db/uniprot_sprot.trinotate.pep"
@@ -133,7 +133,7 @@ rule transdecoder_pep_uniref90:
         2>  {log.err}                           |
         {gzip} -9 > {output.table}
 
-		touch {log.out}
+        touch {log.out}
         """
 
 
@@ -192,10 +192,10 @@ rule transdecoder_predict:
         err=    "data/transdecoder/{sample}_predict.err"
     shell:
         """
-        {predict}                                           		    \
-            -t                      {input.assembly}        		    \
+        {predict}                                                       \
+            -t                      {input.assembly}                    \
             --retain_pfam_hits      <({gzip} -dc {input.pfam_table})    \
-            --retain_blastp_hits    <({gzip} -dc {input.uniref_table})	\
+            --retain_blastp_hits    <({gzip} -dc {input.uniref_table})  \
         >   {log.out}                                                   \
         2>  {log.err}
         
@@ -243,7 +243,7 @@ rule trinotate_pep_sprot:
         2>  {log.err}                       |
         {gzip} -9 > {output.table}
 
-		touch {log.out}
+        touch {log.out}
         """
 
 
@@ -274,7 +274,7 @@ rule trinotate_rna_sprot:
         2>  {log.err}                       |
         {gzip} -9 > {output.table}
 
-		touch {log.out}
+        touch {log.out}
         """
 
 
@@ -305,7 +305,7 @@ rule trinotate_pep_uniref90:
         2>  {log.err}                       |
         {gzip} -9 > {output.table}
 
-		touch {log.out}
+        touch {log.out}
         """
 
 
@@ -336,7 +336,7 @@ rule trinotate_rna_uniref90:
         2>  {log.err}                       |
         {gzip} -9 > {output.table}
 
-		touch   {log.out}
+        touch   {log.out}
         """
 
 

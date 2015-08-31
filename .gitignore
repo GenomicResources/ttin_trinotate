@@ -1,0 +1,5 @@
+.snakemake/
+data/db/
+pipeline.pdf
+src/tmhmm-2.0c/bin/decodanhmm
+

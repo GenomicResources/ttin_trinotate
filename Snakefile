@@ -1,7 +1,7 @@
 shell.prefix("set -euo pipefail;")
 
-sample= "test"
-#SAMPLES= "test".split()
+SAMPLES, = glob_wildcards("./data/assembly/{sample}.fasta")
+
 
 ### Executables
 longorfs    = "./src/TransDecoder-2.0.1/TransDecoder.LongOrfs"
@@ -30,19 +30,13 @@ gzip        = "pigz"
 
 rule all:
     input:
-        #expand( "data/transdecoder/{sample}.pep",
-        #    sample= SAMPLES),
-        #expand( "data/trinotate/{sample}_pep_uniref90.tsv.gz",
-        #    sample= SAMPLES),
-        #expand( "data/trinotate/{sample}_rna_uniref90.tsv.gz",
-        #    sample= SAMPLES),
-        #expand( "data/trinotate/{sample}_pep_sprot.tsv.gz",
-        #    sample= SAMPLES),
-        #expand( "data/trinotate/{sample}_rna_sprot.tsv.gz",
-        #    sample= SAMPLES),
-        #expand( "data/trinotate/{sample}_pep_pfam.tsv.gz",
-        #    sample= SAMPLES),
-        "data/trinotate/test.tsv"
+        expand("data/trinotate/{sample}.tsv", sample= SAMPLES)
+
+
+
+rule only_transdecoder:
+    input:
+        expand("data/transdecoder/{sample}.pep", sample= SAMPLES)
 
 
 
@@ -185,6 +179,7 @@ rule transdecoder_predict:
         pep=    "data/transdecoder/{sample}.pep"
     params:
         folder= "data/transdecoder",
+        tmp_dir="{sample}.fasta.transdecoder_dir",
         bed=    "{sample}.fasta.transdecoder.bed",
         cds=    "{sample}.fasta.transdecoder.cds",
         gff3=   "{sample}.fasta.transdecoder.gff3",
@@ -210,8 +205,11 @@ rule transdecoder_predict:
         mv  {params.mRNA} {output.mRNA}
         mv  {params.pep}  {output.pep}
         
-        rm -rf {sample}.fasta.transdecoder_dir
+        rm -rf {params.tmp_dir}
         """
+
+
+
 
 
 
@@ -421,6 +419,7 @@ rule trinotate_rna_rnammer:
     threads:
         24 # Because it uses nonspecific temporary filenames
     params:
+        gff=    "{sample}.fasta.rnammer.gff",
         tmp=    "tmp.superscaff.rnammer.gff",
         fasta=  "transcriptSuperScaffold.fasta",
         bed=    "transcriptSuperScaffold.bed"
@@ -435,9 +434,9 @@ rule trinotate_rna_rnammer:
         >   {log.out}                           \
         2>  {log.err}
         
-        mv {sample}.fasta.rnammer.gff {output.gff}
+        mv {params.gff} {output.gff}
         
-        rm {params}
+        rm {params.tmp} {params.fasta} {params.bed}
         """
 
 

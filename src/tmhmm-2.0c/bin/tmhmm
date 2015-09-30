@@ -32,7 +32,7 @@ die ("Error on command line") unless $result;
 # full path to the main directory of the software
 #$opt_basedir = "/usr/cbs/packages/tmhmm/2.0c/tmhmm-2.0c/";
 
-$opt_basedir = "/home/jlanga/trinotate_pipeline/src/tmhmm-2.0c/";
+$opt_basedir = "./src/tmhmm-2.0c/";
 
 if (!defined($opt_basedir)) {
    # Record the name under which the program was called

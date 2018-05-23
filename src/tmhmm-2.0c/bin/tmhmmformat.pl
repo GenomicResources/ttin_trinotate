@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/env perl 
 
 # This is version 2.0c of tmhmmformat.pl
 
